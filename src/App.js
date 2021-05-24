@@ -5,7 +5,7 @@ import 'semantic-ui-css/semantic.min.css'
 
 const google = window.google;
 
-class Locator extends React.Component {
+class Wizometer extends React.Component {
   constructor(props) {
     super(props);
     this.autocomplete = null;
@@ -74,20 +74,22 @@ class Locator extends React.Component {
   }
 
   getWizometer(day) {
-    let wizzes = []
+    console.log('day info: ', day);
 
+    let wizzes = []
     wizzes.push(this.getIconWiz(day))
     wizzes.push(this.getRainWiz(day))
-    wizzes.push(this.getTempWiz(day))
-    console.log('day info: ', day);
+    wizzes.push(this.getTempWindWiz(day))
+
     console.log('wizzes', wizzes);
     return Math.min(...wizzes);
   }
 
   // going to use apparent temp here because it takes humidity into account
   // @TODO account for seasonality here - a 40-50 day in winter would be an 11 for most climates
-  getTempWiz(day) {
+  getTempWindWiz(day) {
     console.log('temp wiz---');
+    let tempWiz = 11;
     const tempHigh = Math.floor(day.apparentTemperatureHigh),
           tempLow = Math.floor(day.apparentTemperatureLow),
           tempDelta = tempHigh - tempLow,
@@ -97,7 +99,7 @@ class Locator extends React.Component {
     // according to https://www.huffingtonpost.com.au/2017/11/27/this-is-the-perfect-temperature-for-being-happy-and-social-study-finds_a_23288718/
     // the perfect outdoor temperature is 72 degrees, so key off that
     if ((tempAvg <= 82) && (tempAvg >= 62)) {
-      return 11;
+      tempWiz = 11;
     } else {
       let delta = 0;
       if (tempAvg > 82) {
@@ -107,8 +109,15 @@ class Locator extends React.Component {
       } else {
         delta = Math.round((82 - tempAvg) / 15);
       }
-      return 11 - delta;
+      tempWiz = (11 - delta);
     }
+
+    if (day.windSpeed > 10) {
+      console.log('windy: -' + (Math.floor(day.windspeed / 10)));
+      tempWiz = tempWiz - (Math.floor(day.windspeed / 10));
+    }
+
+    return tempWiz;
   }
   getIconWiz(day) {
     const iconWz = {
@@ -187,25 +196,6 @@ function Filter(props) {
   );
 }
 */
-
-
-
-class Wizometer extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      streams: [],
-    }
-  }
-
-  render() {
-    return(
-      <div className="wiz">
-        <Locator />
-      </div>
-    )
-  }
-}
 
 function App() {
   return (

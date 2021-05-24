@@ -78,16 +78,43 @@ class Locator extends React.Component {
 
     wizzes.push(this.getIconWiz(day))
     wizzes.push(this.getRainWiz(day))
+    wizzes.push(this.getTempWiz(day))
     console.log('day info: ', day);
     console.log('wizzes', wizzes);
     return Math.min(...wizzes);
   }
 
+  // going to use apparent temp here because it takes humidity into account
+  // @TODO account for seasonality here - a 40-50 day in winter would be an 11 for most climates
+  getTempWiz(day) {
+    console.log('temp wiz---');
+    const tempHigh = Math.floor(day.apparentTemperatureHigh),
+          tempLow = Math.floor(day.apparentTemperatureLow),
+          tempDelta = tempHigh - tempLow,
+          // average is 1/3 of the way down from tempHigh because most people care about daylight
+          tempAvg = Math.floor(tempHigh - (tempDelta / 3));
+    
+    // according to https://www.huffingtonpost.com.au/2017/11/27/this-is-the-perfect-temperature-for-being-happy-and-social-study-finds_a_23288718/
+    // the perfect outdoor temperature is 72 degrees, so key off that
+    if ((tempAvg <= 82) && (tempAvg >= 62)) {
+      return 11;
+    } else {
+      let delta = 0;
+      if (tempAvg > 82) {
+        console.log('too hot');
+        // too stinkin' hot
+        delta = Math.round((tempAvg - 82) / 10);
+      } else {
+        delta = Math.round((82 - tempAvg) / 15);
+      }
+      return 11 - delta;
+    }
+  }
   getIconWiz(day) {
     const iconWz = {
       'clear-day' : 11, 
       'clear-night': 11,
-      'rain': 5,
+      'rain': 6,
       'snow': 9,
       'sleet': 2,
       'wind' : 8,
@@ -100,7 +127,21 @@ class Locator extends React.Component {
   }
 
   getRainWiz(day) {
-    return 6
+    const chanceOfRain = Math.floor(day.precipProbability * 100);
+    if (chanceOfRain === 0) {
+      return 11
+    } else {
+      // for every increase of 10 percent chance of rain
+      let delta = Math.floor(chanceOfRain / 10);
+      // light rain is beter than heavy rain
+      if (day.precipIntensityMax > 1) {
+        delta *= 0.7
+      } else {
+        delta *= 0.3
+      }
+      console.log('rain wiz', Math.floor(11 - delta));
+      return Math.floor(11 - delta);
+    }
   }
 
   render() {

@@ -13,6 +13,7 @@
     "semantic-ui-react": "^2.0.3",
     "web-vitals": "^1.1.2"
   },
+  "homepage": "https://chippenzie.github.io/wizometer/",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

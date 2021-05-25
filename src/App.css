@@ -36,3 +36,19 @@
     transform: rotate(360deg);
   }
 }
+
+.wizometer {
+  min-width: 410px;
+}
+.pac-target-input {
+  width: 100%;
+}
+.wiz-local {
+  font-size: 12rem;
+}
+.zip-disp {
+  padding: 5px;
+}
+.credits {
+  font-size: 1rem;
+}

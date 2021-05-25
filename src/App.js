@@ -1,7 +1,7 @@
 //import { render } from '@testing-library/react';
 import React from 'react';
 import 'semantic-ui-css/semantic.min.css'
-//import './App.css';
+import './App.css';
 
 const google = window.google;
 
@@ -94,27 +94,29 @@ class Wizometer extends React.Component {
           tempLow = Math.floor(day.apparentTemperatureLow),
           tempDelta = tempHigh - tempLow,
           // average is 1/3 of the way down from tempHigh because most people care about daylight
-          tempAvg = Math.floor(tempHigh - (tempDelta / 3));
+          tempAvg = Math.floor(tempHigh - (tempDelta / 3)),
+          maxPerfectDay = 80,
+          minPerfectDay = 62;
     
     // according to https://www.huffingtonpost.com.au/2017/11/27/this-is-the-perfect-temperature-for-being-happy-and-social-study-finds_a_23288718/
     // the perfect outdoor temperature is 72 degrees, so key off that
-    if ((tempAvg <= 82) && (tempAvg >= 62)) {
+    if ((tempAvg <= maxPerfectDay) && (tempAvg >= minPerfectDay)) {
       tempWiz = 11;
     } else {
       let delta = 0;
-      if (tempAvg > 82) {
+      if (tempAvg > maxPerfectDay) {
         console.log('too hot');
         // too stinkin' hot
-        delta = Math.round((tempAvg - 82) / 10);
+        delta = Math.round((tempAvg - maxPerfectDay) / 5);
       } else {
-        delta = Math.round((82 - tempAvg) / 15);
+        delta = Math.round((minPerfectDay - tempAvg) / 15);
       }
       tempWiz = (11 - delta);
     }
 
     if (day.windSpeed > 10) {
-      console.log('windy: -' + (Math.floor(day.windspeed / 10)));
-      tempWiz = tempWiz - (Math.floor(day.windspeed / 10));
+      console.log('windy: -' + (Math.floor(day.windSpeed / 10)));
+      tempWiz = tempWiz - (Math.floor(day.windSpeed / 10));
     }
 
     return tempWiz;
@@ -132,7 +134,7 @@ class Wizometer extends React.Component {
       'partly-cloudy-day': 11, 
       'partly-cloudy-night' : 9,
     }
-    return iconWz[day.summary] ? iconWz[day.summary] : 0;
+    return iconWz[day.icon] ? iconWz[day.icon] : 0;
   }
 
   getRainWiz(day) {
@@ -153,20 +155,37 @@ class Wizometer extends React.Component {
     }
   }
 
+
+
   render() {
-    let zipDisp = this.state.zipcode ? this.state.zipcode : 'type an address to begin';
-    let wizDisp = this.state.wizometer ? 'Today is a ' + this.state.wizometer : this.state.zipcode ? 'Wizzing' : '';
+    let zipDisp = this.state.zipcode ? `Zip Code: ${this.state.zipcode}` : 'type an address to begin',
+        wizTextDisp = this.state.wizometer ? 'Today is a' : this.state.zipcode ? 'Wizzing' : <span>&nbsp;</span>,
+        wizNumberDisp = this.state.wizometer ? this.state.wizometer : <span>&nbsp;</span>;
+
+    if (this.state.wizometer === 8 || this.state.wizometer === 11 ) {
+      wizTextDisp = 'Today is an';
+    }
+    
+    let handleSubmit = (e) => {
+      e.preventDefault();
+    }
 
     return (
-      <div>
-        <form>
-          <input id="location-autocomplete" size = "100" type="text" />
-       </form>
-       <div>
+      <div className="wizometer">
+        <form onSubmit={handleSubmit}>
+          <input id="location-autocomplete" width="100%" type="text" />
+        </form>
+       <div className="zip-disp">
          {zipDisp}
        </div>
-       <div>
-         {wizDisp}
+       <div className="zip-disp">
+         {wizTextDisp}
+       </div>
+       <h2 className="wiz-local">
+         {wizNumberDisp}
+       </h2>
+       <div className="credits">
+         Powered By <a href="https://pirateweather.net" target="_blank">Pirate Weather</a>
        </div>
       </div>
     )
